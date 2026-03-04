@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluating Text Style Transfer: A Nine-language Benchmark for Text Detoxification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink:     #0f1117;
+      --soft:    #3d4556;
+      --muted:   #7a849a;
+      --rule:    #dde1ea;
+      --bg:      #f7f8fb;
+      --surface: #ffffff;
+      --teal:    #1a6b6b;
+      --teal-lt: #e6f4f4;
+      --teal-md: #2a9090;
+      --amber:   #c97b2a;
+      --rose:    #b34060;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── TOP BAND ────────────────────────────────────────────── */
+    .venue-bar {
+      background: var(--teal);
+      color: #fff;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 9px 1rem;
+    }
+
+    /* ── HERO ────────────────────────────────────────────────── */
+    .hero {
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
+      padding: 4rem 1.5rem 3.5rem;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: var(--teal-lt);
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      padding: 4px 12px;
+      margin-bottom: 1.4rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.75rem, 4vw, 2.8rem);
+      line-height: 1.18;
+      max-width: 820px;
+      margin: 0 auto 1.6rem;
+      color: var(--ink);
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--teal);
+    }
+
+    .authors {
+      font-size: 0.97rem;
+      color: var(--soft);
+      margin-bottom: 0.35rem;
+      max-width: 680px;
+      margin-inline: auto;
+    }
+
+    .authors a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .authors a:hover { text-decoration: underline; }
+
+    .affiliations {
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto 2.2rem;
+      line-height: 1.5;
+    }
+
+    /* ── LINK PILLS ──────────────────────────────────────────── */
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      justify-content: center;
+      margin-bottom: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 5px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      padding: 9px 18px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .pill:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+
+    .pill-primary {
+      background: var(--teal);
+      color: #fff;
+    }
+    .pill-ghost {
+      background: var(--surface);
+      color: var(--teal);
+      border: 1.5px solid var(--teal);
+    }
+    .pill-dark {
+      background: var(--ink);
+      color: #fff;
+    }
+    .pill-amber {
+      background: #fff8ee;
+      color: var(--amber);
+      border: 1.5px solid #e8b97a;
+    }
+
+    .pill svg { flex-shrink: 0; }
+
+    /* ── LAYOUT ──────────────────────────────────────────────── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      padding: 3.5rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    section:last-child { border-bottom: none; }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.65rem;
+      color: var(--ink);
+      margin-bottom: 1.2rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--teal);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      margin-top: 1.6rem;
+    }
+    h3:first-child { margin-top: 0; }
+
+    p { color: var(--soft); margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── ABSTRACT ────────────────────────────────────────────── */
+    .abstract-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--teal);
+      border-radius: 6px;
+      padding: 1.8rem 2rem;
+    }
+
+    /* ── CONTRIBUTIONS ───────────────────────────────────────── */
+    .contrib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    .contrib-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.4rem 1.5rem;
+      transition: box-shadow 0.2s;
+    }
+    .contrib-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+
+    .contrib-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--teal);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .contrib-card p { font-size: 0.9rem; margin: 0; }
+
+    /* ── METRICS ─────────────────────────────────────────────── */
+    .metric-trio {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    @media (max-width: 640px) {
+      .metric-trio { grid-template-columns: 1fr; }
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.7rem;
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-card p {
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .metric-new {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── FORMULA ─────────────────────────────────────────────── */
+    .formula-block {
+      background: #0f1117;
+      color: #e8ecf4;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 2;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+    }
+
+    .formula-block .var-t { color: #7ecfcf; }
+    .formula-block .var-a { color: #f4b860; }
+    .formula-block .var-c { color: #a8c8f0; }
+    .formula-block .comment { color: #5a6680; font-size: 0.82rem; }
+
+    /* ── LANGUAGES ───────────────────────────────────────────── */
+    .lang-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+
+    .lang-badge {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--soft);
+      padding: 5px 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lang-badge .flag { font-size: 1.05rem; }
+
+    /* ── FINDINGS ────────────────────────────────────────────── */
+    .findings-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .findings-list li {
+      display: flex;
+      gap: 0.9rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--rule);
+      color: var(--soft);
+      font-size: 0.93rem;
+    }
+    .findings-list li:last-child { border-bottom: none; }
+
+    .fi-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--teal-lt);
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    /* ── RESOURCES ───────────────────────────────────────────── */
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    .resource-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.4rem 1.5rem;
+      text-decoration: none;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .resource-card:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    .resource-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+    }
+    .icon-hf   { background: #fff3e6; }
+    .icon-gh   { background: #f0f0f8; }
+    .icon-data { background: #e6f4f4; }
+
+    .resource-body { min-width: 0; }
+    .resource-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+    .resource-desc {
+      font-size: 0.81rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── CITATION ────────────────────────────────────────────── */
+    .citation-block {
+      background: #0f1117;
+      border-radius: 8px;
+      padding: 1.5rem 1.8rem;
+      position: relative;
+      margin-top: 1rem;
+    }
+
+    .citation-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: #b8c4d8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #8a9ab8;
+      font-size: 0.75rem;
+      font-family: 'DM Sans', sans-serif;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      background: var(--ink);
+      color: #5a6680;
+      text-align: center;
+      font-size: 0.82rem;
+      padding: 2rem 1.5rem;
+    }
+
+    footer a { color: var(--teal-md); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── ANIMATIONS ──────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero > * {
+      animation: fadeUp 0.55s ease both;
+    }
+    .hero > *:nth-child(1) { animation-delay: 0.05s; }
+    .hero > *:nth-child(2) { animation-delay: 0.12s; }
+    .hero > *:nth-child(3) { animation-delay: 0.19s; }
+    .hero > *:nth-child(4) { animation-delay: 0.26s; }
+    .hero > *:nth-child(5) { animation-delay: 0.33s; }
+
+    /* ── DIVIDER ─────────────────────────────────────────────── */
+    .section-kicker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.4rem;
+    }
+
+    /* table-like comparison */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 560px) { .compare-row { grid-template-columns: 1fr; } }
+
+    .compare-card {
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.3rem 1.4rem;
+      background: var(--surface);
+    }
+    .compare-card.hl { border-color: var(--teal); background: var(--teal-lt); }
+
+    .compare-card .ctag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .compare-card.hl .ctag { color: var(--teal); }
+
+    .compare-card ul {
+      list-style: none;
+      font-size: 0.88rem;
+      color: var(--soft);
+    }
+    .compare-card ul li { padding: 3px 0; display: flex; align-items: flex-start; gap: 6px; }
+    .compare-card ul li::before { content: "–"; color: var(--muted); flex-shrink: 0; }
+    .compare-card.hl ul li::before { content: "✓"; color: var(--teal); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- Venue bar -->
+  <div class="venue-bar">LREC-COLING 2026 &nbsp;·&nbsp; Long Paper</div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <span class="hero-tag">Text Style Transfer Evaluation</span>
+    <h1>Evaluating Text Style Transfer:<br/><em>A Nine-language Benchmark for Text Detoxification</em></h1>
+    <p class="authors">
+      <a href="#">Vitaly Protasov</a><sup>1</sup>,&nbsp;
+      <a href="#">Nikolay Babakov</a><sup>2</sup>,&nbsp;
+      <a href="#">Daryna Dementieva</a><sup>3,4</sup>,&nbsp;
+      <a href="#">Alexander Panchenko</a><sup>5,1</sup>
+    </p>
+    <p class="affiliations">
+      <sup>1</sup>AIRI &nbsp;·&nbsp;
+      <sup>2</sup>Universidade de Santiago de Compostela &nbsp;·&nbsp;
+      <sup>3</sup>Technical University of Munich (TUM) &nbsp;·&nbsp;
+      <sup>4</sup>Munich Center for Machine Learning (MCML) &nbsp;·&nbsp;
+      <sup>5</sup>Skoltech
+    </p>
+    <div class="links">
+      <a class="pill pill-primary" href="https://arxiv.org/abs/2507.15557" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Paper (arXiv)
+      </a>
+      <a class="pill pill-dark" href="https://github.com/textdetox/eval-of-detox-eval" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        Code & Data
+      </a>
+      <a class="pill pill-ghost" href="https://huggingface.co/datasets/textdetox/detoxification_pairwise_style_evaluation" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 36 36" fill="none"><path d="M18 3C9.716 3 3 9.716 3 18s6.716 15 15 15 15-6.716 15-15S26.284 3 18 3z" fill="currentColor" opacity=".15"/><text x="7" y="24" font-size="16" fill="currentColor">🤗</text></svg>
+        HuggingFace
+      </a>
+      <a class="pill pill-amber" href="https://textdetox.github.io" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        TextDetox Project
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Abstract -->
+    <section>
+      <div class="section-kicker">Abstract</div>
+      <h2>Reliable multilingual evaluation for text detoxification</h2>
+      <div class="abstract-card">
+        <p>
+          Despite notable advances in large language models (LLMs), reliable evaluation of text generation tasks
+          such as text style transfer (TST) remains an open challenge. Existing research has shown that automatic
+          metrics often correlate poorly with human judgments, limiting our ability to assess model performance
+          accurately. Furthermore, most prior work has focused primarily on English, while the evaluation of
+          multilingual TST systems—particularly for text detoxification—remains largely underexplored.
+        </p>
+        <p>
+          In this paper, we present the <strong>first comprehensive multilingual benchmarking study</strong> of
+          evaluation metrics for text detoxification across <strong>nine languages</strong>. Drawing inspiration from
+          machine translation evaluation, we compare neural-based automatic metrics with LLM-as-a-judge approaches
+          together with experiments on task-specific fine-tuned models. Our analysis reveals that the proposed
+          metrics achieve significantly higher correlation with human judgments compared to baseline approaches.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contributions -->
+    <section>
+      <div class="section-kicker">Contributions</div>
+      <h2>What this paper does</h2>
+      <div class="contrib-grid">
+        <div class="contrib-card">
+          <div class="contrib-num">01</div>
+          <p>First <strong>extensive multilingual evaluation study</strong> for text detoxification covering all publicly available datasets.</p>
+        </div>
+        <div class="contrib-card">
+          <div class="contrib-num">02</div>
+          <p>Several <strong>improved metric configurations</strong> tailored to the specific challenges of detoxification evaluation.</p>
+        </div>
+        <div class="contrib-card">
+          <div class="contrib-num">03</div>
+          <p>Systematic <strong>comparison of neural metrics vs. LLM-as-a-judge</strong> setups across all nine languages.</p>
+        </div>
+        <div class="contrib-card">
+          <div class="contrib-num">04</div>
+          <p><strong>Fine-tuned open-source LLMs</strong> on annotated detoxification data, evaluated as automatic judges.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Languages -->
+    <section>
+      <div class="section-kicker">Coverage</div>
+      <h2>Nine languages, one benchmark</h2>
+      <p>Building on the <strong>TextDetoxEval</strong> shared task dataset — 20 detoxification systems, 900 toxic inputs, 16,600 annotated pairs — our study spans a typologically diverse set of languages.</p>
+      <div class="lang-grid">
+        <div class="lang-badge"><span class="flag">🇸🇦</span> Arabic</div>
+        <div class="lang-badge"><span class="flag">🇪🇹</span> Amharic</div>
+        <div class="lang-badge"><span class="flag">🇨🇳</span> Chinese</div>
+        <div class="lang-badge"><span class="flag">🇬🇧</span> English</div>
+        <div class="lang-badge"><span class="flag">🇩🇪</span> German</div>
+        <div class="lang-badge"><span class="flag">🇮🇳</span> Hindi</div>
+        <div class="lang-badge"><span class="flag">🇷🇺</span> Russian</div>
+        <div class="lang-badge"><span class="flag">🇪🇸</span> Spanish</div>
+        <div class="lang-badge"><span class="flag">🇺🇦</span> Ukrainian</div>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section>
+      <div class="section-kicker">Methodology</div>
+      <h2>A new recipe for detoxification evaluation</h2>
+
+      <p>Classic detoxification evaluation relied on ChrF for fluency, cosine similarity of LaBSE embeddings for content, and a single toxicity classifier probability for style accuracy — all combined into a joint score <strong>J</strong>. We identify the core weaknesses and propose targeted improvements for each dimension.</p>
+
+      <div class="compare-row">
+        <div class="compare-card">
+          <div class="ctag">Baseline (J-OLD)</div>
+          <ul>
+            <li>ChrF n-gram overlap vs. reference only</li>
+            <li>Input-only cosine similarity (LaBSE)</li>
+            <li>Single classifier probability for toxicity</li>
+            <li>No reference or source context for toxicity</li>
+          </ul>
+        </div>
+        <div class="compare-card hl">
+          <div class="ctag">Proposed (J-NEW / J-XCOMET-CLS)</div>
+          <ul>
+            <li>XCOMET-lite: semantic triplet (src, hyp, ref)</li>
+            <li>SIM-JOINED: weighted input + reference similarity</li>
+            <li>CLS-NEW: relative toxicity across input, output, ref</li>
+            <li>Penalisation and rewarding stabilisation rules</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="metric-trio" style="margin-top:2rem">
+        <div class="metric-card">
+          <div class="metric-icon">🧬</div>
+          <div class="metric-label">Fluency (FL)</div>
+          <div class="metric-name">XCOMET-lite</div>
+          <span class="metric-new">New</span>
+          <p>Replaces ChrF with a compressed COMET model using input–output–reference triplets to assess fluency semantically.</p>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🔗</div>
+          <div class="metric-label">Content (SIM)</div>
+          <div class="metric-name">SIM-JOINED</div>
+          <span class="metric-new">New</span>
+          <p>Weighted combination of input–output and output–reference cosine similarity (w=0.4 / 0.6), balancing preservation and reference alignment.</p>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-label">Style (STA)</div>
+          <div class="metric-name">CLS-NEW</div>
+          <span class="metric-new">New</span>
+          <p>Triplet-based toxicity scoring with penalisation (output more toxic than input → 0) and rewarding (output ≥ reference quality → 1).</p>
+        </div>
+      </div>
+
+      <h3>Joint metric formula</h3>
+      <div class="formula-block">
+<span class="comment">// Original joint metric</span>
+J = (1/n) · Σ <span class="var-t">STA</span>(yᵢ) · <span class="var-c">SIM</span>(xᵢ, yᵢ) · <span class="var-a">chrF</span>(xᵢ, yᵢ)
+
+<span class="comment">// Proposed: STA → CLS-NEW,  SIM → SIM-JOINED,  FL → XCOMET-lite</span>
+J-NEW = (1/n) · Σ <span class="var-t">CLS-NEW</span>(tᵢ, tg, tᵣ) · <span class="var-c">SIM-JOINED</span>(vᵢ, vg, vᵣ) · <span class="var-a">XCOMET-lite</span>(src, hyp, ref)
+
+<span class="comment">// Simplified (XCOMET handles both fluency &amp; content)</span>
+J-XCOMET-CLS = (1/n) · Σ <span class="var-t">CLS-NEW</span>(tᵢ, tg, tᵣ) · <span class="var-a">XCOMET-lite</span>(src, hyp, ref)
+      </div>
+    </section>
+
+    <!-- Key findings -->
+    <section>
+      <div class="section-kicker">Results</div>
+      <h2>Key findings</h2>
+      <ul class="findings-list">
+        <li>
+          <div class="fi-icon">1</div>
+          <span><strong>ChrF fails for detoxification</strong> — near-zero Spearman correlations in Arabic, German, Chinese, English, and Ukrainian. Its character n-gram overlap penalises the substantial rewording detoxification inherently requires.</span>
+        </li>
+        <li>
+          <div class="fi-icon">2</div>
+          <span><strong>XCOMET-lite matches XCOMET-XXL</strong> on fluency across most languages at only 40% of the computational cost — the recommended default for competitions and production systems.</span>
+        </li>
+        <li>
+          <div class="fi-icon">3</div>
+          <span><strong>LLMs outperform automatic metrics for fluency</strong> in Arabic, Hindi, Russian, and Ukrainian (LLaMA 3.3-70B-Instruct-Turbo leads). Automatic metrics remain stronger for content similarity in most languages.</span>
+        </li>
+        <li>
+          <div class="fi-icon">4</div>
+          <span><strong>Fine-tuned Llama-3.1-8B dominates toxicity evaluation</strong> — highest correlations in Amharic, Chinese, English, German, and Ukrainian. Fluency fine-tuning benefits are English-centric due to training data imbalance.</span>
+        </li>
+        <li>
+          <div class="fi-icon">5</div>
+          <span><strong>J-NEW beats J-OLD in all nine languages</strong>, with J-XCOMET-CLS (the simplified version) performing best in Chinese, English, Spanish, and Ukrainian — suggesting XCOMET alone captures both fluency and content.</span>
+        </li>
+        <li>
+          <div class="fi-icon">6</div>
+          <span><strong>GPT-4.1-mini is the strongest LLM judge for toxicity</strong> across most languages, while DeepSeek-R1-Distill-Qwen-32B achieves the best Russian toxicity correlations by a significant margin.</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Resources -->
+    <section>
+      <div class="section-kicker">Resources</div>
+      <h2>Datasets, models &amp; code</h2>
+      <p>All evaluation code, fine-tuned models, and datasets are publicly available to facilitate reproducibility and future research.</p>
+
+      <div class="resource-grid">
+        <a class="resource-card" href="https://huggingface.co/datasets/textdetox/detoxification_pairwise_style_evaluation" target="_blank">
+          <div class="resource-icon icon-hf">🤗</div>
+          <div class="resource-body">
+            <div class="resource-title">TextDetoxEval Style</div>
+            <div class="resource-desc">hf.co/datasets/textdetox/…style_evaluation</div>
+          </div>
+        </a>
+        <a class="resource-card" href="https://huggingface.co/datasets/textdetox/detoxification_pairwise_content_evaluation" target="_blank">
+          <div class="resource-icon icon-hf">🤗</div>
+          <div class="resource-body">
+            <div class="resource-title">TextDetoxEval Content</div>
+            <div class="resource-desc">hf.co/datasets/textdetox/…content_evaluation</div>
+          </div>
+        </a>
+        <a class="resource-card" href="https://huggingface.co/datasets/textdetox/humaneval_textdetox_ru" target="_blank">
+          <div class="resource-icon icon-data">📊</div>
+          <div class="resource-body">
+            <div class="resource-title">RUSSE-2022 Human Eval</div>
+            <div class="resource-desc">hf.co/datasets/textdetox/humaneval_textdetox_ru</div>
+          </div>
+        </a>
+        <a class="resource-card" href="https://huggingface.co/textdetox/Llama-pairwise-toxicity-evaluator" target="_blank">
+          <div class="resource-icon icon-hf">🤗</div>
+          <div class="resource-body">
+            <div class="resource-title">Llama Toxicity Evaluator</div>
+            <div class="resource-desc">hf.co/textdetox/Llama-pairwise-toxicity-evaluator</div>
+          </div>
+        </a>
+        <a class="resource-card" href="https://huggingface.co/textdetox/Llama-pairwise-content-evaluator" target="_blank">
+          <div class="resource-icon icon-hf">🤗</div>
+          <div class="resource-body">
+            <div class="resource-title">Llama Content Evaluator</div>
+            <div class="resource-desc">hf.co/textdetox/Llama-pairwise-content-evaluator</div>
+          </div>
+        </a>
+        <a class="resource-card" href="https://github.com/textdetox/eval-of-detox-eval" target="_blank">
+          <div class="resource-icon icon-gh">💻</div>
+          <div class="resource-body">
+            <div class="resource-title">Evaluation Code</div>
+            <div class="resource-desc">github.com/textdetox/eval-of-detox-eval</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Citation -->
+    <section>
+      <div class="section-kicker">Cite</div>
+      <h2>BibTeX</h2>
+      <div class="citation-block">
+        <button class="copy-btn" onclick="copyCite()">Copy</button>
+        <pre id="bibtex">@article{protasov2025evaluating,
+  title   = {Evaluating Text Style Transfer: A Nine-Language
+             Benchmark for Text Detoxification},
+  author  = {Protasov, Vitaly and Babakov, Nikolay and
+             Dementieva, Daryna and Panchenko, Alexander},
+  journal = {arXiv preprint arXiv:2507.15557},
+  year    = {2025}
+}</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      <a href="https://github.com/textdetox/eval-of-detox-eval">textdetox/eval-of-detox-eval</a>
+      &nbsp;·&nbsp;
+      LREC-COLING 2026
+      &nbsp;·&nbsp;
+      <a href="https://textdetox.github.io">TextDetox Project</a>
+    </p>
+    <p style="margin-top:0.5rem; color:#3d4556;">
+      All resources released under OpenRail++ licence.
+    </p>
+  </footer>
+
+  <script>
+    function copyCite() {
+      const txt = document.getElementById('bibtex').textContent;
+      navigator.clipboard.writeText(txt).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
