@@ -1,6 +1,8 @@
 # Evaluating Text Style Transfer: A Nine-language Benchmark for Text Detoxification (LREC2026)
 
-In this work, we present a novel automatic evaluation pipeline for text detoxification systems. Thus, the new reciepe consists of such pipelines:
+In this paper, we present the first comprehensive **multilingual benchmarking study of evaluation metrics** for text detoxification across nine languages. Drawing inspiration from machine translation evaluation, we compare neural-based automatic metrics with LLM-as-a-judge approaches together with experiments on task-specific fine-tuned models. Our analysis reveals that the proposed metrics achieve significantly higher correlation with human judgments compared to baseline approaches.
+
+Thus, the new reciepe consists of such pipelines:
 
 * **Style Transfer Accuracy (STA)**: not just a strict classification, but a comparison if a model's output is less toxic than the output or even less toxic than the human reference;
 * **Content Preservation (SIM)**: cosine similarity to both the original toxic sentence and the human refernece;
@@ -18,24 +20,24 @@ Our fine-tuned LLMs-as-a-Judge:
 * **LLama-toxicity-evaluator**: https://huggingface.co/textdetox/Llama-pairwise-toxicity-evaluator
 * **LLama-content-evaluator**: https://huggingface.co/textdetox/Llama-pairwise-content-evaluator
 
-## Datasets in This Repo
+## How to Run
+
+### Datasets in This Repo
 - TextDetoxEval: [path](dataset/dataset_textdetoxeval.csv)
 - RUSSE2022-TextDetox: [path](dataset/dataset_russe2022.csv)
-
-## Evaluation
 
 ### Requirements
 Works for:
 - `python 3.11.*`
 - `torch==2.1.1+cu121`
 
-## How to run
+### How to launch
 ```python
 # see arguments with provided texts and parameters
 python evaluation/evaluate.py
 ```
 
-## How to make plots
+### How to make plots
 - Notebook [TextDetoxEval]: [click](vizualize/plot_textdetoxeval.ipynb)
 - Notebook [RUSSE2022]: [click](vizualize/plot_russe2022.ipynb)
 
